@@ -14,8 +14,7 @@ class StartChat:
     def start(self):
         tokens = Tokenizer().tokenize(self.command)
         Parser().parse(tokens)
-
-
+        
 
 while True:
     StartChat().start()
