@@ -6,11 +6,11 @@ from datetime import datetime
 class DBA:
     __doc__ = """Database api for storing messages to improve Jake's future responses."""
 
-    def __init__(self, path="Jake.db"):
+    def __init__(self, path="Jake.db",**kwargs):
         self.conn = sqlite3.connect(path)
         self.cursor = self.conn.cursor()
 
-    def create_table(self,table):
+    def create_table(self,table,**kwargs):
         """Creates a table with table_name as parameter table"""
 
         sql = "CREATE TABLE IF NOT EXISTS {}(id INTEGER PRIMARY KEY, Text TEXT, Date TEXT, Time TEXT)"
@@ -43,12 +43,11 @@ class DBA:
         count=0
         if kwargs:
             sql = "SELECT * FROM ErrorMsgs"
-            for key,value in kwargs.items():
-                if count < 1:
+            for index,(key,value) in enumerate(kwargs.items(),1):
+                if index < 2:
                     sql += " WHERE {} = '{}'".format(key,value)
                 else:
                     sql += " AND {} = '{}'".format(key, value)
-                count += 1
         else:
             sql = "SELECT * FROM ErrorMsgs"
         try:
