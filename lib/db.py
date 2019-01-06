@@ -15,8 +15,7 @@ class DBA:
         self.create_all()
         self.__dict__.update(kwargs)
 
-
-    def insert_msg(self, id, msg, address, reply):
+    """ def insert_msg(self, id, msg, address, reply):
         try:
             self.__cursor__.execute("INSERT OR IGNORE INTO Messages(id, msg, address,reply) VALUES(?,?,?,?)",
                       (id, msg, address, reply))
@@ -34,6 +33,7 @@ class DBA:
             return None
         else:
             return self.__cursor__.fetchall()
+    """
 
     def create_all(self):
         values = []
