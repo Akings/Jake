@@ -1,8 +1,10 @@
 from lib.db import *
+from models import Message
 from datetime import datetime
+
 class Parser:
     def __init__(self):
-        self.db = DBA()
+        pass
 
     def match(self, arr, snts):
         count = 0
@@ -43,5 +45,8 @@ class Parser:
             string = string.strip()
             # date = datetime.now().date()
             # time = datetime.now().time()
-            self.db.create_error(string)
+            new = Message()
+            new.message = string
+            new.save()
+            #self.db.create_error(string)
 
