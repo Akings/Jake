@@ -1,10 +1,7 @@
-from lib.parser import *
+from lib.parser import Parser
 from lib.tokenizer import *
-from lib.db import *
+from models import Message
 
-
-new = DBA()
-new.create_table('ErrorMsgs')
 
 class StartChat:
     # Asks user for input
@@ -14,7 +11,8 @@ class StartChat:
     def start(self):
         tokens = Tokenizer().tokenize(self.command)
         Parser().parse(tokens)
-        
+
 
 while True:
     StartChat().start()
+
