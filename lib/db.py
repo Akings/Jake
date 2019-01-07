@@ -1,5 +1,5 @@
-from lib.objects import *
-import lib.config as config
+from Jake.lib.objects import *
+import Jake.lib.config as config
 
 
 class DBA:
@@ -12,7 +12,7 @@ class DBA:
         self.__conn__ = self.__conn__
         self.__cursor__ = self.__cursor__
         self.__table_name__ = self.__table_name__
-        self.create_all()
+        # self.create_all()
         self.__dict__.update(kwargs)
 
     """ def insert_msg(self, id, msg, address, reply):
@@ -45,6 +45,7 @@ class DBA:
         #print(self.get_var_values())
         for i,desc in zip(self.get_var_values(),des):
             if isinstance(i, models.CharField):
+                #print(i)
                 values.append('TEXT')
             if isinstance(i, models.IntegerField):
                 if desc['PRIMARY_KEY']==True:
@@ -54,7 +55,7 @@ class DBA:
             if isinstance(i, models.FloatField):
                 values.append("REAL")
         #print(des)
-        config.columns = names
+        #config.columns = names
         sql = "CREATE TABLE IF NOT EXISTs {}".format(self.__table_name__)
 
         for index,(name,value,d) in (enumerate(zip(names,values,des))):
@@ -84,7 +85,7 @@ class DBA:
                 else:
                     sql += ")"
         # sql.replace(".",")")
-        #print(sql)
+       # print(sql)
         try:
             self.__cursor__ .execute(sql)
         except Exception as e:
@@ -128,40 +129,119 @@ class DBA:
                 all[key]=value
         #print(all)
         for index, (key, value) in enumerate((all.items()), 0):
-            if index < 1:
-                sql += "({}".format(key)
-            elif index > 0 and index != len(all.values())-1:
-                sql += " ,{},".format(key)
+            if len(all.values()) > 1:
+                # if it is first key
+                if index < 1:
+                    sql += "({},".format(key)
+                # if it is last key
+                elif index == len(all.values())-1:
+                    sql += "{}) VALUES".format(key)
+                # if it is in the middle
+                else:
+                    sql += "{},".format(key)
             else:
-                sql += " {}".format(key)
-        sql +=") VALUES"
-
+                sql += "({}) VALUES".format(key)
+        #print(all.values())
         for index, (key, value) in enumerate((all.items()), 0):
-            if index < 1:
-                if type(value) is int:
-                    sql+="({}".format(value)
+            if len(all.values())>1:
+                # if first value
+                if index < 1:
+                    if type(value) is int:
+                        sql+="({},".format(value)
+                    else:
+                        sql += "('{}',".format(value)
+                # if last value
+                elif index == len(all.values())-1:
+                    if type(value) is int:
+                        sql += "{})".format(value)
+                    else:
+                        sql += "'{}')".format(value)
                 else:
-                    sql += "('{}'".format(value)
-            elif index > 0 and index != len(all.values())-1:
-                if type(value) is int:
-                    sql += ",{},".format(value)
-                else:
-                    sql += ",'{}',".format(value)
+                    if type(value) is int:
+                        sql += "{},".format(value)
+                    else:
+                        sql += "'{}',".format(value)
             else:
                 if type(value) is int:
-                    sql += "{}".format(value)
+                    sql += "({})".format(value)
                 else:
-                    sql += "'{}'".format(value)
-            sql+=")"
+                    sql += "('{}')".format(value)
+
         #print(sql)
         try:
             self.__cursor__ .execute(sql)
         except Exception as e:
-            #print(e)
+            print(e)
             return False
         else:
             #print(" saved")
             self.__conn__.commit()
             object = self
             return object
+
+    def alter_table(self):
+        #old_fields = config.columns
+        #new_fields = self.get_var_names()
+        #print(old_fields)
+        #print(new_fields)
+        values = []
+        names = self.get_var_names()
+        des = []
+        for i in self.get_var_values():
+            des.append(vars(i))
+        #print(des)
+        #print(self.get_var_values())
+        for i,desc in zip(self.get_var_values(),des):
+            if isinstance(i, models.CharField):
+                #print(i)
+                values.append('TEXT')
+            if isinstance(i, models.IntegerField):
+                if desc['PRIMARY_KEY']==True:
+                    values.append("INTEGER PRIMARY KEY,")
+                else:
+                    values.append("INTEGER,")
+            if isinstance(i, models.FloatField):
+                values.append("REAL")
+        #print(values)
+
+        sql = "ALTER TABLE {} ADD COLUMN ".format(self.__table_name__)
+
+        for index, (name, value, d) in (enumerate(zip(names, values, des))):
+            # print(values[index])
+            if index == 0:
+                sql += "{} {}".format(name, value)
+                if d.values():
+                    for i in d.values():
+                        if "INTEGER" not in value:
+                            sql += "({})".format(i)
+                else:
+                    sql += ""
+            elif index > 0 and index != len(values) - 1:
+                sql += "{} {}".format(name, value)
+                if d.values():
+                    for i in d.values():
+                        if "INTEGER" not in value:
+                            sql += "({})".format(i)
+                else:
+                    sql += ""
+            else:
+                sql += "{} {}".format(name, value)
+                if d.values():
+                    for i in d.values():
+                        if "INTEGER" not in value:
+                            sql += "({})".format(i)
+                else:
+                    sql += ""
+        # sql.replace(".",")")
+            try:
+                self.__cursor__.execute(sql)
+            except Exception as e:
+                print(e)
+            else:
+                print("Added")
+
+            #print(sql)
+            sql = "ALTER TABLE {} ADD COLUMN ".format(self.__table_name__)
+
+        return "Migration done"
 

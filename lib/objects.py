@@ -1,4 +1,4 @@
-import lib.config as config
+import Jake.lib.config as config
 
 
 class Objects:
@@ -15,8 +15,7 @@ class Objects:
 
     class Object:
         def __init__(self, **kwargs):
-            for key, value in kwargs.items():
-                setattr(self, key, value)
+            self.__dict__.update(kwargs)
 
         class Meta:
             verbose_name = "Message"
@@ -29,15 +28,16 @@ class Objects:
         pairs = []
         pairer = []
         sql = "SELECT * FROM {}".format(self.__tablename__)
-        print(sql)
+        #print(sql)
         try:
             result = self.__cursor__.execute(sql)
         except Exception as e:
-            return e
+            print(e)
+            return []
         else:
             result = result.fetchall()
-            if result is None:
-                return None
+            if len(result) < 0:
+                return []
             #print(result)
             #print(config.columns)
             for each in result:
@@ -52,6 +52,38 @@ class Objects:
             #print(pairs)
             return results
 
+    def filter(self,**kwargs):
+        results = []
+        pairs= []
+        if kwargs:
+            sql = "SELECT * FROM {}".format(self.__tablename__)
+            for index, (key, value) in enumerate(kwargs.items(), 1):
+                if index < 2:
+                    sql += " WHERE {} = '{}'".format(key, value)
+                else:
+                    sql += " AND {} = '{}'".format(key, value)
+        else:
+            sql = "SELECT * FROM {}".format(self.__tablename__)
+        #print(sql)
+        try:
+            result = self.__cursor__.execute(sql)
+        except Exception as e:
+            print(e)
+            return []
+        else:
+            if result is None:
+                return []
+            for each in result:
+                obj = self.Object()
+                count = 0
+                for i in each:
+                    obj.__setattr__(config.columns[count],i)
+                    pairs.append((config.columns[count],i))
+                    count += 1
+                results.append(obj)
+                del obj
+            #print(pairs)
+            return results
     def get(self,**kwargs):
         results = []
         pairs= []
@@ -64,21 +96,22 @@ class Objects:
                     sql += " AND {} = '{}'".format(key, value)
         else:
             sql = "SELECT * FROM {}".format(self.__tablename__)
+        #print(sql)
         try:
             result = self.__cursor__.execute(sql)
         except Exception as e:
             print(e)
-            return None
+            return []
         else:
             if result is None:
-                return None
+                return []
             for each in result:
                 obj = self.Object()
                 count = 0
                 for i in each:
                     obj.__setattr__(config.columns[count],i)
                     pairs.append((config.columns[count],i))
-                    count+=1
+                    count += 1
                 results.append(obj)
                 del obj
             #print(pairs)

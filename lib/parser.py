@@ -1,6 +1,7 @@
-from lib.db import *
-from models import Message
+from Jake.lib.db import *
+from Jake.lib.models import Message
 from datetime import datetime
+from random import choice
 
 class Parser:
     def __init__(self):
@@ -30,15 +31,28 @@ class Parser:
         self.reps = reps
         print ('Jake> ' + self.reps)
 
-    def parse(self, snt):
-        if self.match(['what', 'your', 'name'], snt):
-            self.respond('i am Jake')
+    def parse(self,res, snt):
+        choices = {1:"greetings",2:"questions about me",
+                   3:"questions about weather",4:"I dont know",5:"conversation",6:"actions"}
+        thanks = ['Hey thanks',"I appreciate that","Thanks for improving me","I'm really grateful"]
+        #print(mes)
+        #print(res)
+        #print(snt[0])
+
             
-        elif self.alt(["hello", "hi","hey"], snt):
-            self.respond("hello there")
+        #if self.match(res,snt):
+         #   print(True)
+         #   self.respond(choice(res))
+        #elif self.alt()
+        if len(res) > 0:
+            self.respond(choice(res))
             
         else:
             self.respond("still improving, i don't understand that for now")
+            user = input("Please teach me the answer: ")
+            print("""My Categories:{}
+            """.format(choices))
+            cat = input("To what category does this answer belong?: ")
             string = ""
             for i in snt:
                 string += i + " "
@@ -47,6 +61,9 @@ class Parser:
             # time = datetime.now().time()
             new = Message()
             new.message = string
+            new.response = user
+            new.category = choices[(int(cat))]
             new.save()
+            print(choice(thanks))
             #self.db.create_error(string)
 
