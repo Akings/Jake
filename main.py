@@ -7,6 +7,7 @@ class StartChat:
     # Asks user for input
     def __init__(self,):
         self.command = input("Waiting for your input> ")
+        self.name = "Jake"
 
     def start(self):
         tokens = Tokenizer().tokenize(self.command)
